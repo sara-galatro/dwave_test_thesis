@@ -443,7 +443,9 @@ class direct_embedding:
         else:
             for j in range(len(terms_s)):
                 if x1 in terms_s[j] and x2 in terms_s[j]:
-                    self.H += (1+np.abs(terms_c[j]))*gadget(x1, x2, xa)
+                    #self.H += (1+np.abs(terms_c[j]))*gadget(x1, x2, xa) # old
+                    self.H += (1+np.abs(terms_c[j]))*self.gadget(x1, x2, xa) # mine
+                    
 
     def to_gadget_5(self, x, ancillas):
         """Function that decomposes a multi-qubit interaction hamiltonian into 2-qubit using ancillas.
