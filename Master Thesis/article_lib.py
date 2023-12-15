@@ -9,6 +9,8 @@ for my Master's thesis.
 ASK ABOUT CREDITS AND/OR LICENCE (I take no credit, ecc or something like that?)
 '''
 
+############################# Imports
+
 import numpy as np
 from sympy import symbols, expand
 import collections
@@ -161,11 +163,11 @@ class truncated_embedding:
 
         """
         self.reduce_to_one_body()
-        print(f'One Body Hamiltonian:\n {self.H}')
+        #print(f'One Body Hamiltonian:\n {self.H}')
         new_p = self.cutoff_p()
-        print(f'new_p:\n {new_p}')
+        #print(f'new_p:\n {new_p}')
         self.encode_new_p(new_p)
-        print(f'Final Hamiltonian:\n {self.H}')
+        #print(f'Final Hamiltonian:\n {self.H}')
         return self.H
 
     def get_symbols(self):
@@ -288,7 +290,7 @@ class penalization_embedding:
                 out.append(xo)
                 o += 1
             outputs.append(out)
-        print(f'Total output qubits used: {o}\n')
+        print(f'Total output qubits used: {o}.')
         return outputs
 
     def create_hamiltonian(self):
@@ -562,14 +564,6 @@ class direct_embedding:
         return self.create_hamiltonian()
 
 ############################# "Real" Hamiltonian
-
-import numpy as np
-from dwave.system.samplers import DWaveSampler
-from dwave.system.composites import EmbeddingComposite
-import dimod
-import dwave.inspector as insp
-import itertools
-
 
 class dwave_annealing:
     def __init__(self, H, bits, sym, numruns=1000, T=20, chainstrength=None):
