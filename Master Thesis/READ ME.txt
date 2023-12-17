@@ -7,6 +7,8 @@ In this repo you may find:
 
 It's still a work in progress, so in the notebooks and the python libraries there are a few notes about stuff to fix, but it's mainly about theory and presentation, the code is already stable.
 
+**IMPORTANT NOTE** the notebook `3_energies_comparison.ipynb` is still to run. I used all my time on D-Wave's QPUs, so it has to wait for the moment.
+
 Credits: the functions, methods, and classes in the file 'article_lib.py' are taken from the original github repo by the authors of the article (I'll add the link later on). The same holds true for the files 'examples_anf.py' and 'examples_nnf.py'.
 
 Everything else, even though inspired from their work, has been written from scratch by me.

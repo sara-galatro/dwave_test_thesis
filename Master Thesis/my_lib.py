@@ -150,6 +150,7 @@ class dwave_runners:
         self.T = T
         self.topology = topology
         self.chosen_chainstrength = chosen_chainstrength
+        self.energies_hist = []
         self.Q = Q
         self.offset = offset
 
@@ -276,7 +277,8 @@ class dwave_runners:
             Outputs:
                 solution (list): list of final found values for the variables.
                 timing_info (dict): dictionary with total timings.
-                physical_qubits (float): number of the physical qubits used.
+                physical_qubits (float): total number of the physical qubits used.
+                it (int): final iteration run.
         '''
 
         ## general setup     
@@ -295,7 +297,9 @@ class dwave_runners:
             order = np.argsort(record['energy'])
 
             best_sample, best_energy = response.first.sample, response.first.energy
+            #best_sample, best_energy = record.sample[order[0]], record.energy[order[0]]
             print(f'Energy of best sample at iteration {it}: {best_energy}')
+            print(f'Best sample: {best_sample[:self.bits]}')
 
             if best_energy == 0:
                 print(f'Solution found with final iteration {it}.')
@@ -317,6 +321,14 @@ class dwave_runners:
                 ph_qubits, ph_chains = self.get_info_on_embedding(ph_info)
                 physical_qubits += ph_qubits
 
+            ## energies histogram
+            ph_energy = []
+            for i in range(len(record.energy)):
+                for j in range(record.num_occurrences[order[i]]):
+                    ph_energy.append(record.energy[order[i]])
+
+            self.energies_hist.append(ph_energy)
+            
             ## fixing variables
             print("Fixing ancillae...")
             for i in range(self.bits, num_variables):
