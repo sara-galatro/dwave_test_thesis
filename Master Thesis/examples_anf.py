@@ -1,3 +1,16 @@
+'''
+Examples file taken from the repository
+    https://github.com/qiboteam/mq-problem-quantum-annealing
+by Sergi Ramos-Calderer and Ruge Lin for the article 
+    "Solving systems of Boolean multivariate equations with quantum annealing" 
+(https://arxiv.org/abs/2111.13224) by Sergi Ramos-Calderer, Carlos Bravo-Prieto, 
+Ruge Lin, Emanuele Bellini, Marc Manzano, Najwa Aaraj, and José I. Latorre.
+
+All the code in this file is credited to the authors.
+
+A few changes in the notation have been made to run smoothly with my code.
+'''
+
 def example_4_anf(x1, x2, x3, x4):
     p = [
         x1*x2 + x1*x3 + x1*x4 + x1 + x2*x3 + x2*x4 + x2 + x3*x4 + x4,

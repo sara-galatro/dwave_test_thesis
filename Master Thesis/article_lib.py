@@ -1,25 +1,22 @@
 '''
 Library created using functions defined in the repository
-    ADD LINK
-by ADD AUTHORS for the article ADD TITLE.
+    https://github.com/qiboteam/mq-problem-quantum-annealing
+by Sergi Ramos-Calderer and Ruge Lin for the article 
+    "Solving systems of Boolean multivariate equations with quantum annealing" 
+(https://arxiv.org/abs/2111.13224) by Sergi Ramos-Calderer, Carlos Bravo-Prieto, 
+Ruge Lin, Emanuele Bellini, Marc Manzano, Najwa Aaraj, and José I. Latorre.
 
-In this file, all functions are taken from their repository to build new code
-for my Master's thesis.
+All the code in this file is credited to the authors.
 
-ASK ABOUT CREDITS AND/OR LICENCE (I take no credit, ecc or something like that?)
+A few changes in the notation have been made to run smoothly with my code.
 '''
 
 ############################# Imports
 
 import numpy as np
 from sympy import symbols, expand
-import collections
 import itertools
 from scipy.special import binom
-from dwave.system.samplers import DWaveSampler
-from dwave.system.composites import EmbeddingComposite
-import dimod
-import dwave.inspector as insp
 
 ############################# Embedding
 
@@ -282,11 +279,11 @@ class penalization_embedding:
         o = 1
         for i in range(len(self.p)):
             out = []
-            xo = symbols(f'xo{o}')
+            xo = symbols(f'o{o}')
             out.append(xo)
             o += 1
             for j in range(len(self.p[i].args)):
-                xo = symbols(f'xo{o}')
+                xo = symbols(f'o{o}')
                 out.append(xo)
                 o += 1
             outputs.append(out)
@@ -328,19 +325,19 @@ class penalization_embedding:
                     H += self.const_penalization(outputs[i][j], outputs[i][j+1])
                 elif len(symbol) == 1:
                     if ancillas.get(symbol[0]*outputs[i][j]) is None:
-                        a = symbols(f'xa{c}')
+                        a = symbols(f'a{c}')
                         anc.append(a)
                         ancillas[symbol[0]*outputs[i][j]] = a
                         c += 1
                     H += self.cnot_penalization(outputs[i][j], symbol[0], outputs[i][j+1], ancillas[symbol[0]*outputs[i][j]])
                 elif len(symbol) == 2:
                     if ancillas.get(symbol[0]*symbol[1]) is None:
-                        a = symbols(f'xa{c}')
+                        a = symbols(f'a{c}')
                         anc.append(a)
                         ancillas[symbol[0]*symbol[1]] = a
                         c += 1
                     if ancillas.get(ancillas[symbol[0]*symbol[1]]*outputs[i][j]) is None:
-                        a = symbols(f'xa{c}')
+                        a = symbols(f'a{c}')
                         anc.append(a)
                         ancillas[ancillas[symbol[0]*symbol[1]]*outputs[i][j]] = a
                         c += 1
@@ -465,8 +462,7 @@ class direct_embedding:
         else:
             for j in range(len(terms_s)):
                 if x1 in terms_s[j] and x2 in terms_s[j]:
-                    #self.H += (1+np.abs(terms_c[j]))*gadget(x1, x2, xa) # old
-                    self.H += (1+np.abs(terms_c[j]))*self.gadget(x1, x2, xa) # mine
+                    self.H += (1+np.abs(terms_c[j]))*self.gadget(x1, x2, xa) 
                     
 
     def to_gadget_5(self, x, ancillas):

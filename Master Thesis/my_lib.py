@@ -1,7 +1,11 @@
 '''
-Library of functions used in the notebooks for my Master's Thesis.
+Library of functions used in the QA notebooks for my Master's Thesis.
 
-Inspired by the work of ADD AUTHORS, ADD ARTICLE.
+Inspired by the work of Sergi Ramos-Calderer, Carlos Bravo-Prieto, 
+Ruge Lin, Emanuele Bellini, Marc Manzano, Najwa Aaraj, and José I. Latorre 
+for  
+    "Solving systems of Boolean multivariate equations with quantum annealing" 
+(https://arxiv.org/abs/2111.13224).
 '''
 
 #################################### Imports
@@ -37,8 +41,8 @@ def building_H_direct_pyqubo(bits: int, chosen_model: str):
     '''
 
     ## setup
-    #x_bin = Array([Binary(f'x{i}') for i in range(bits)])  # variables 0-8
-    x_bin = Array([Binary(f'x{i}') for i in range(1,bits+1)])       # variables 1-9
+    #x_bin = Array([Binary(f'x{i}') for i in range(bits)])     # variables 0-8
+    x_bin = Array([Binary(f'x{i}') for i in range(1,bits+1)])  # variables 1-9
     #display(x_bin)
 
     if bits == 5:
@@ -69,7 +73,7 @@ def building_H_direct_pyqubo(bits: int, chosen_model: str):
 #################################### D-Wave Running
 
 
-def single_run_from_pyqubo(H, topology, chosen_chainstrength):
+def single_it_from_pyqubo(H, topology, chosen_chainstrength):
 
     '''
         Function that runs *once* the sampling for the given Hamiltonian
@@ -93,10 +97,10 @@ def single_run_from_pyqubo(H, topology, chosen_chainstrength):
 
     ## sampler
     if topology == "Zephyr":
-        sampler = EmbeddingComposite(DWaveSampler(solver={'topology__type': 'zephyr'}))
+        sampler = EmbeddingComposite(DWaveSampler(solver={'name': 'Advantage2_prototype2.2'}))
         print('Running on Zephyr Topology.')
     elif topology == "Pegasus":
-        sampler = EmbeddingComposite(DWaveSampler(solver={'topology__type': 'pegasus'}))
+        sampler = EmbeddingComposite(DWaveSampler(solver={'name': 'Advantage_system6.3'}))
         print('Running on Pegasus Topology.')
 
     ## chainstrength
@@ -173,10 +177,10 @@ class dwave_runners:
         '''
 
         if self.topology == "Zephyr":
-            self.sampler = EmbeddingComposite(DWaveSampler(solver={'topology__type': 'zephyr'}))
+            self.sampler = EmbeddingComposite(DWaveSampler(solver={'name': 'Advantage2_prototype2.2'}))
             print('Running on Zephyr Topology.')
         elif self.topology == "Pegasus":
-            self.sampler = EmbeddingComposite(DWaveSampler(solver={'topology__type': 'pegasus'}))
+            self.sampler = EmbeddingComposite(DWaveSampler(solver={'name': 'Advantage_system6.3'}))
             print('Running on Pegasus Topology.')
         
 
@@ -245,13 +249,13 @@ class dwave_runners:
         return(q_count, sorted_chains)
     
 
-    def single_run(self):
+    def single_it(self):
         '''
             Function that runs *once* the sampling for the given Hamiltonian
             on D-Wave devices.
 
             Outputs:
-                response: SampleSet object with the details of the run. 
+                response: SampleSet object with the details of the sampling. 
         '''
 
         self.define_chainstrength()      
@@ -264,7 +268,7 @@ class dwave_runners:
         return(response)
 
 
-    def iterative(self, iterations=5 ,treshold=10):
+    def iterative(self, iterations=5, threshold=10):
 
         '''
             Run on QPU multiple times, each iteration fixing 
@@ -272,7 +276,7 @@ class dwave_runners:
 
             Inputs: 
                 iterations (int): number of single runs (default=5).
-                treshold (int): number of samples to comparate to fix the ancillae (default=10).
+                threshold (int): number of samples to comparate to fix the ancillae (default=10).
 
             Outputs:
                 solution (list): list of final found values for the variables.
@@ -292,18 +296,14 @@ class dwave_runners:
             print(f'Number of variables: {num_variables}')
                     
             ## running on QPU
-            response = self.single_run()
+            response = self.single_it()
             record = response.record
-            order = np.argsort(record['energy'])
+            order = np.argsort(record['energy'])        ## needed 'cause the samples are not ordered
 
             best_sample, best_energy = response.first.sample, response.first.energy
             #best_sample, best_energy = record.sample[order[0]], record.energy[order[0]]
             print(f'Energy of best sample at iteration {it}: {best_energy}')
-            print(f'Best sample: {best_sample[:self.bits]}')
-
-            if best_energy == 0:
-                print(f'Solution found with final iteration {it}.')
-                break
+            #print(f'Best sample: {best_sample}')
 
             ## info
             if it == 0:                 # first iteration
@@ -312,6 +312,7 @@ class dwave_runners:
                 #embedding
                 embedding_info = response.info['embedding_context']['embedding']
                 physical_qubits, chains = self.get_info_on_embedding(embedding_info)
+                show(response)
             else:                        # later iterations
                 # timings
                 for key in timing_info.keys():
@@ -328,6 +329,11 @@ class dwave_runners:
                     ph_energy.append(record.energy[order[i]])
 
             self.energies_hist.append(ph_energy)
+
+            if best_energy == 0:
+                print(f'Solution found with final iteration {it}.')
+                #show(response)
+                break
             
             ## fixing variables
             print("Fixing ancillae...")
@@ -336,7 +342,7 @@ class dwave_runners:
                 ph_value = record.sample[order[0]][i]
 
                 # checking for shared values
-                for k in range(min(treshold, len(record.sample))):
+                for k in range(min(threshold, len(record.sample))):
                     if ph_value != record.sample[order[k]][i]:
                         flag = False
                         break
@@ -348,7 +354,7 @@ class dwave_runners:
                 print(f'{key} : {fixed[key]}')
             print('\n------------------------------------------------------------------------\n')
 
-            ## modifying Hamiltonian
+            ## updating Hamiltonian
             for var in fixed.keys():
                 if var not in self.H.variables:        # checking if it's a new fix or not
                     continue
@@ -404,7 +410,7 @@ class dwave_runners:
         physical_qubits = 0
 
         self.numruns = 1
-        self.define_chainstrength()  
+        self.define_chainstrength()      
 
         for t in range(average):
 
